@@ -1,0 +1,197 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_assignbulkedit/editor
+
+    Table of assignments with editable settings plus a bulk-fill toolbar.
+
+    Example context (json):
+    {
+        "actionurl": "https://example.com/local/assignbulkedit/index.php",
+        "courseid": 2,
+        "sesskey": "abc",
+        "hasrows": true,
+        "allchoices": [{"value": "5", "label": "Same as Essay 1"}],
+        "defaultcolumns": "visible,duedate",
+        "groups": [{"label": "General", "columns": [{"field": "visible", "label": "Visibility", "checked": true}]}],
+        "filter": "",
+        "fields": [
+            {"field": "duedate", "label": "Due date", "hint": null, "isselect": false, "type": "datetime-local", "value": ""},
+            {"field": "visible", "label": "Visibility", "hint": null, "isselect": true,
+             "options": [{"value": "1", "label": "Shown", "selected": true}]}
+        ],
+        "rows": [{
+            "assignid": 5, "name": "Essay 1", "url": "#", "editurl": "#", "section": "Topic 1", "hidden": false,
+            "cells": [
+                {"field": "duedate", "isselect": false, "type": "datetime-local", "value": "2026-10-10T17:00",
+                 "original": "2026-10-10T17:00", "changed": false, "error": null, "label": "Due date: Essay 1",
+                 "isnumber": false, "step": "1", "disabled": false, "note": null},
+                {"field": "visible", "isselect": true, "original": "1", "changed": false, "error": null,
+                 "label": "Visibility: Essay 1", "disabled": false, "note": null,
+                 "options": [{"value": "1", "label": "Shown", "selected": true}]}
+            ]
+        }]
+    }
+}}
+{{^hasrows}}
+    {{#str}} noassignments, local_assignbulkedit {{/str}}
+{{/hasrows}}
+{{#hasrows}}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+    <label for="local_assignbulkedit_filter" class="form-label mb-0">{{#str}} filter, local_assignbulkedit {{/str}}</label>
+    <input type="search" id="local_assignbulkedit_filter" class="form-control w-auto" value="{{filter}}"
+           data-action="filter" placeholder="{{#str}} filterplaceholder, local_assignbulkedit {{/str}}">
+    <span class="text-muted small" data-region="filtercount" aria-live="polite"></span>
+    <div class="form-check form-switch mb-0 ms-2">
+        <input type="checkbox" class="form-check-input" id="local_assignbulkedit_changedonly" data-action="changedonly">
+        <label for="local_assignbulkedit_changedonly" class="form-check-label">{{#str}} changedonly, local_assignbulkedit {{/str}}</label>
+    </div>
+    <div class="dropdown ms-auto">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
+                data-bs-auto-close="outside" aria-expanded="false" id="local_assignbulkedit_columnsbtn">
+            {{#str}} columns, local_assignbulkedit {{/str}}
+        </button>
+        <div class="dropdown-menu dropdown-menu-end p-3 local-assignbulkedit-columns" aria-labelledby="local_assignbulkedit_columnsbtn"
+             data-region="columns" data-default="{{defaultcolumns}}">
+            {{#groups}}
+            <fieldset class="mb-2">
+                <legend class="fs-6 fw-bold mb-1">{{label}}</legend>
+                {{#columns}}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="local_assignbulkedit_col_{{field}}"
+                           data-column="{{field}}"{{#checked}} checked{{/checked}}>
+                    <label for="local_assignbulkedit_col_{{field}}" class="form-check-label">{{label}}</label>
+                </div>
+                {{/columns}}
+            </fieldset>
+            {{/groups}}
+            <button type="button" class="btn btn-link btn-sm p-0" data-action="defaultcolumns">
+                {{#str}} columnsdefault, local_assignbulkedit {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+<form method="post" action="{{actionurl}}" id="local_assignbulkedit_form" data-region="local_assignbulkedit">
+    <input type="hidden" name="id" value="{{courseid}}">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <input type="hidden" name="filter" value="{{filter}}" data-region="filtervalue">
+
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap align-items-end gap-2">
+            <div>
+                <label for="local_assignbulkedit_field" class="form-label mb-1">{{#str}} field, local_assignbulkedit {{/str}}</label>
+                <select id="local_assignbulkedit_field" class="form-select" data-action="bulkfield">
+                    {{#fields}}
+                        <option value="{{field}}"{{#colhidden}} hidden{{/colhidden}}>{{label}}</option>
+                    {{/fields}}
+                    <option value="all">{{#str}} allsettings, local_assignbulkedit {{/str}}</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label mb-1" data-region="bulkvaluelabel">{{#str}} value, local_assignbulkedit {{/str}}</label>
+                {{#fields}}
+                    {{#isselect}}
+                    <select id="local_assignbulkedit_value_{{field}}" class="form-select" data-bulkvalue="{{field}}" hidden>
+                        {{#options}}<option value="{{value}}">{{label}}</option>{{/options}}
+                    </select>
+                    {{/isselect}}
+                    {{^isselect}}
+                    <input type="{{type}}" id="local_assignbulkedit_value_{{field}}" class="form-control" data-bulkvalue="{{field}}"
+                           {{#isnumber}}min="0" step="{{step}}"{{/isnumber}} aria-describedby="local_assignbulkedit_valuehelp" hidden>
+                    {{/isselect}}
+                {{/fields}}
+                <select id="local_assignbulkedit_value_all" class="form-select" data-bulkvalue="all" hidden>
+                    {{#allchoices}}<option value="{{value}}">{{label}}</option>{{/allchoices}}
+                </select>
+            </div>
+            <button type="button" class="btn btn-secondary" data-action="bulkapply">
+                {{#str}} applytoselected, local_assignbulkedit {{/str}}
+            </button>
+            <div id="local_assignbulkedit_valuehelp" class="form-text w-100 mt-0">
+                {{#str}} clearvalue, local_assignbulkedit {{/str}}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle generaltable local-assignbulkedit-table">
+            <thead>
+                <tr>
+                    <th scope="col" class="local-assignbulkedit-sticky1">
+                        <input type="checkbox" class="form-check-input" data-action="selectall" id="local_assignbulkedit_all">
+                        <label for="local_assignbulkedit_all" class="visually-hidden">{{#str}} selectall, local_assignbulkedit {{/str}}</label>
+                    </th>
+                    <th scope="col" class="local-assignbulkedit-sticky2">{{#str}} assignment, local_assignbulkedit {{/str}}</th>
+                    {{#fields}}
+                    <th scope="col" data-col="{{field}}" data-label="{{label}}"{{#colhidden}} hidden{{/colhidden}}>
+                        {{label}}
+                        {{#hint}}<div class="small fw-normal text-muted">{{.}}</div>{{/hint}}
+                    </th>
+                    {{/fields}}
+                </tr>
+            </thead>
+            <tbody>
+                {{#rows}}
+                <tr data-assignid="{{assignid}}" data-search="{{name}} {{section}}">
+                    <td class="local-assignbulkedit-sticky1">
+                        <input type="checkbox" class="form-check-input" data-action="select" id="local_assignbulkedit_sel{{assignid}}">
+                        <label for="local_assignbulkedit_sel{{assignid}}" class="visually-hidden">{{#str}} select, local_assignbulkedit, {{name}} {{/str}}</label>
+                    </td>
+                    <td class="local-assignbulkedit-sticky2">
+                        <a href="{{url}}" class="{{#hidden}}text-muted{{/hidden}}">{{name}}</a>
+                        <a href="{{editurl}}" class="ms-1" title="{{#str}} editsettings, local_assignbulkedit, {{name}} {{/str}}"
+                           aria-label="{{#str}} editsettings, local_assignbulkedit, {{name}} {{/str}}">{{#pix}} i/settings, core {{/pix}}</a>
+                        <div class="small text-muted">{{section}}</div>
+                    </td>
+                    {{#cells}}
+                    <td class="{{#changed}}table-warning{{/changed}}" data-cell="{{field}}" data-col="{{field}}"{{#colhidden}} hidden{{/colhidden}}>
+                        <input type="hidden" name="o[{{assignid}}][{{field}}]" value="{{original}}">
+                        <label for="local_assignbulkedit_{{assignid}}_{{field}}" class="visually-hidden">{{label}}</label>
+                        {{#isselect}}
+                        <select name="q[{{assignid}}][{{field}}]" id="local_assignbulkedit_{{assignid}}_{{field}}"
+                                class="form-select form-select-sm{{#error}} is-invalid{{/error}}"
+                                data-field="{{field}}" data-original="{{original}}"
+                                {{#disabled}}disabled{{/disabled}} {{#error}}aria-invalid="true"{{/error}}>
+                            {{#options}}<option value="{{value}}"{{#selected}} selected{{/selected}}>{{label}}</option>{{/options}}
+                        </select>
+                        {{/isselect}}
+                        {{^isselect}}
+                        <input type="{{type}}" name="q[{{assignid}}][{{field}}]" value="{{value}}"
+                               id="local_assignbulkedit_{{assignid}}_{{field}}"
+                               class="form-control form-control-sm{{#error}} is-invalid{{/error}}"
+                               data-field="{{field}}" data-original="{{original}}"
+                               {{#isnumber}}min="0" step="{{step}}" style="width: 6em"{{/isnumber}}
+                               {{#disabled}}disabled{{/disabled}} {{#error}}aria-invalid="true"{{/error}}>
+                        {{/isselect}}
+                        {{#note}}<div class="small text-muted">{{.}}</div>{{/note}}
+                        {{#error}}<div class="invalid-feedback">{{.}}</div>{{/error}}
+                    </td>
+                    {{/cells}}
+                </tr>
+                {{/rows}}
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-primary">{{#str}} savechanges, local_assignbulkedit {{/str}}</button>
+</form>
+{{#js}}
+    require(['local_assignbulkedit/editor'], function(editor) {
+        editor.init('local_assignbulkedit_form');
+    });
+{{/js}}
+{{/hasrows}}

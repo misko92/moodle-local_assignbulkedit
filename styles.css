@@ -1,0 +1,35 @@
+/* Keep the select box and quiz name in view while scrolling a wide table sideways. */
+.local-assignbulkedit-table .local-assignbulkedit-sticky1,
+.local-assignbulkedit-table .local-assignbulkedit-sticky2 {
+    position: sticky;
+    background-color: var(--bs-body-bg);
+    z-index: 2;
+}
+
+.local-assignbulkedit-table .local-assignbulkedit-sticky1 {
+    left: 0;
+    width: 2.25rem;
+    min-width: 2.25rem;
+}
+
+.local-assignbulkedit-table .local-assignbulkedit-sticky2 {
+    left: 2.25rem;
+    min-width: 12rem;
+    box-shadow: inset -1px 0 0 var(--bs-border-color);
+}
+
+.local-assignbulkedit-table td,
+.local-assignbulkedit-table th {
+    white-space: nowrap;
+}
+
+.local-assignbulkedit-table .local-assignbulkedit-sticky2,
+.local-assignbulkedit-table th {
+    white-space: normal;
+}
+
+.local-assignbulkedit-columns {
+    max-height: 70vh;
+    overflow-y: auto;
+    min-width: 18rem;
+}
