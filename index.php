@@ -81,11 +81,19 @@ if ($data = data_submitted()) {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('bulkeditassignments', 'local_assignbulkedit'));
-echo html_writer::link(
+$buttons = html_writer::link(
     new moodle_url('/local/assignbulkedit/overrides.php', ['id' => $course->id]),
     get_string('overrides', 'local_assignbulkedit'),
-    ['class' => 'btn btn-outline-primary mb-3']
+    ['class' => 'btn btn-outline-primary']
 );
+if ($assignments && \local_assignbulkedit\local\creator::can_create($course)) {
+    $buttons .= html_writer::link(
+        new moodle_url('/local/assignbulkedit/create.php', ['id' => $course->id]),
+        get_string('create', 'local_assignbulkedit'),
+        ['class' => 'btn btn-outline-primary']
+    );
+}
+echo html_writer::div($buttons, 'd-flex flex-wrap gap-2 mb-3');
 if ($errors) {
     echo $OUTPUT->notification(get_string('fixerrors', 'local_assignbulkedit'), 'error');
 }

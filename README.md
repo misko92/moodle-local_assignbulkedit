@@ -31,6 +31,21 @@ multiple markers (Moodle 5.3+).
 - Only the values you changed are saved, so the page never overwrites edits made elsewhere after you opened it.
 - If any value is invalid, nothing is saved and the errors are shown in place.
 
+## Add assignments
+
+**Bulk edit assignments → Add assignments** creates several assignments at once, each a copy of a model assignment
+you pick from the course, with its own name, section and dates (allow submissions from, due, cut-off; leave a date
+empty for none):
+
+- Copies are made with Moodle's own Duplicate, so every setting carries over, including the description and its
+  files, rubric/marking guide, restrictions and completion; student work, grades, extensions and overrides do not.
+- The model's "Remind me to grade by" date is copied as the same time after each new due date.
+- Add rows one at a time, or paste a list of names (one per line). New assignments go at the end of their section, in
+  row order; optionally hidden from students.
+- **Preview** checks the dates (as the settings form does) and lists what will be created; nothing is created until
+  **Create assignments**. Needs the same permissions as Duplicate (`moodle/backup:backuptargetimport`,
+  `moodle/restore:restoretargetimport`) plus `mod/assign:addinstance`.
+
 ## Extensions & overrides
 
 **Bulk edit assignments → Extensions & overrides** works on chosen students and/or groups across all (or chosen)
