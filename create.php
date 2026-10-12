@@ -46,7 +46,8 @@ $PAGE->navbar->add(get_string('create', 'local_assignbulkedit'), $url);
 if (!creator::can_create($course)) {
     throw new required_capability_exception($context, 'moodle/backup:backuptargetimport', 'nopermissions', '');
 }
-$models = array_map(fn($entry) => $entry['cm']->get_formatted_name(), updater::get_assignments($course));
+// Plain text: the template escapes it.
+$models = array_map(fn($entry) => $entry['cm']->get_formatted_name(['escape' => false]), updater::get_assignments($course));
 if (!$models) {
     redirect($backurl);
 }

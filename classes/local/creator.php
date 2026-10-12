@@ -59,7 +59,7 @@ class creator {
      * The course's sections, for the section drop-down.
      *
      * @param stdClass $course
-     * @return array section number => name
+     * @return array section number => name (plain text)
      */
     public static function sections(stdClass $course): array {
         $sections = [];
@@ -67,9 +67,24 @@ class creator {
             if ($section->is_delegated()) {
                 continue;
             }
-            $sections[$section->section] = get_section_name($course, $section);
+            $sections[$section->section] = self::section_name($course, $section);
         }
         return $sections;
+    }
+
+    /**
+     * A section's name as plain text, for templates (which escape it themselves).
+     *
+     * @param stdClass $course
+     * @param \section_info $section
+     * @return string
+     */
+    public static function section_name(stdClass $course, \section_info $section): string {
+        if ((string) $section->name !== '') {
+            $context = context_course::instance($course->id);
+            return format_string($section->name, true, ['context' => $context, 'escape' => false]);
+        }
+        return course_get_format($course)->get_default_section_name($section);
     }
 
     /**

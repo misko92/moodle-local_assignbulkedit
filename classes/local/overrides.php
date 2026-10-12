@@ -381,7 +381,7 @@ class overrides {
                 $assign = new assign($context, $cm, $course);
                 $date = $row['action'] === 'delete' ? 0 : $row['values']['extensionduedate'];
                 if (!$assign->save_user_extension($row['target']['userid'], $date)) {
-                    throw new \moodle_exception('extensionnotsaved', 'local_assignbulkedit', '', $row['target']['name']);
+                    throw new \moodle_exception('extensionnotsaved', 'local_assignbulkedit', '', s($row['target']['name']));
                 }
             } else {
                 require_capability('mod/assign:manageoverrides', $context);

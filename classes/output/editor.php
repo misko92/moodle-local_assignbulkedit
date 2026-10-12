@@ -16,6 +16,7 @@
 
 namespace local_assignbulkedit\output;
 
+use local_assignbulkedit\local\creator;
 use local_assignbulkedit\local\updater;
 use moodle_url;
 use renderable;
@@ -80,7 +81,7 @@ class editor implements renderable, templatable {
 
         $copychoices = [];
         foreach ($this->assignments as $assignid => ['cm' => $cm]) {
-            $copychoices[$assignid] = get_string('copyfrom', 'local_assignbulkedit', $cm->get_formatted_name());
+            $copychoices[$assignid] = get_string('copyfrom', 'local_assignbulkedit', $cm->get_formatted_name(['escape' => false]));
         }
 
         $fields = [];
@@ -107,7 +108,8 @@ class editor implements renderable, templatable {
 
         $rows = [];
         foreach ($this->assignments as $assignid => ['cm' => $cm, 'assign' => $assign]) {
-            $name = $cm->get_formatted_name();
+            // Plain text: the template escapes it.
+            $name = $cm->get_formatted_name(['escape' => false]);
             $cells = [];
             foreach ($columns as $field) {
                 $original = $this->original[$assignid][$field] ?? updater::format_value($field, $assign->$field);
@@ -130,7 +132,7 @@ class editor implements renderable, templatable {
                 'name' => $name,
                 'url' => (new moodle_url('/mod/assign/view.php', ['id' => $cm->id]))->out(false),
                 'editurl' => (new moodle_url('/course/modedit.php', ['update' => $cm->id]))->out(false),
-                'section' => get_section_name($cm->get_course(), $cm->sectionnum),
+                'section' => creator::section_name($cm->get_course(), $cm->get_modinfo()->get_section_info($cm->sectionnum)),
                 'hidden' => !$cm->visible,
                 'cells' => $cells,
             ];

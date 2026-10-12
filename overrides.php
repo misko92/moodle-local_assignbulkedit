@@ -58,10 +58,11 @@ foreach (get_enrolled_users($context, 'mod/assign:submit', 0, 'u.*', 'u.lastname
 $groups = [];
 foreach (groups_get_all_groups($course->id) as $group) {
     if ($allgroups || in_array($group->id, $mygroups)) {
-        $groups[$group->id] = format_string($group->name, true, ['context' => $context]);
+        $groups[$group->id] = format_string($group->name, true, ['context' => $context, 'escape' => false]);
     }
 }
-$assignnames = array_map(fn($entry) => $entry['cm']->get_formatted_name(), $assignments);
+// Names are plain text here; the form escapes them, the tables below use s().
+$assignnames = array_map(fn($entry) => $entry['cm']->get_formatted_name(['escape' => false]), $assignments);
 
 $customdata = [
     'courseid' => $course->id,
@@ -143,7 +144,7 @@ if ($plan !== null) {
             $existing = $existing ? ['extensionduedate' => $existing] : null;
         }
         $table->data[] = [
-            $assignnames[$row['assignid']],
+            s($assignnames[$row['assignid']]),
             s($row['target']['name']),
             get_string('ovdo' . $row['action'], 'local_assignbulkedit'),
             overrides::describe($existing),
@@ -172,7 +173,10 @@ if (!$current && !$extensions) {
 } else {
     $userids = array_unique(array_merge(array_filter(array_column($current, 'userid')), array_column($extensions, 'userid')));
     $names = $userids ? array_map('fullname', $DB->get_records_list('user', 'id', $userids)) : [];
-    $allgroupnames = array_map(fn($group) => format_string($group->name), groups_get_all_groups($course->id));
+    $allgroupnames = array_map(
+        fn($group) => format_string($group->name, true, ['context' => $context, 'escape' => false]),
+        groups_get_all_groups($course->id)
+    );
     $table = new html_table();
     $table->attributes['class'] = 'generaltable table-sm';
     $table->head = array_map(
@@ -190,7 +194,7 @@ if (!$current && !$extensions) {
                 'cmid' => $cm->id, 'mode' => $override->userid ? 'user' : 'group',
             ]);
             $table->data[] = [
-                html_writer::link($link, $assignnames[$assignid]),
+                html_writer::link($link, s($assignnames[$assignid])),
                 s($who),
                 overrides::describe($override),
                 s($override->reason ?? ''),
@@ -202,7 +206,7 @@ if (!$current && !$extensions) {
             }
             $link = new moodle_url('/mod/assign/view.php', ['id' => $cm->id, 'action' => 'grading']);
             $table->data[] = [
-                html_writer::link($link, $assignnames[$assignid]),
+                html_writer::link($link, s($assignnames[$assignid])),
                 s($names[$flags->userid] ?? '?'),
                 overrides::describe($flags),
                 '',
